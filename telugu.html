@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="te">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Telugu Songs — Music Mama</title>
+  <meta name="description" content="Download Telugu movie songs free. Browse by year 2016–2026.">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="../index.html" class="logo">
+      <div class="logo-icon">🎵</div>
+      <div>
+        <span class="logo-text">Music Mama</span>
+        <span class="logo-sub">Songs Download</span>
+      </div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="../index.html">Home</a></li>
+      <li><a href="telugu.html" class="active">Telugu</a></li>
+    </ul>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <a href="../admin/index.html" style="color:var(--text-muted);font-size:0.82rem;text-decoration:none;">⚙️ Admin</a>
+      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="../index.html">🏠 Home</a>
+    <a href="telugu.html">🎬 Telugu</a>
+    <a href="../admin/index.html">⚙️ Admin</a>
+  </div>
+</nav>
+
+<!-- PAGE HERO -->
+<div style="background:linear-gradient(135deg,#1565C0,#1976D2,#42A5F5);padding:40px 24px;text-align:center;">
+  <h1 style="font-family:var(--font-display);font-size:clamp(1.8rem,5vw,2.8rem);font-weight:800;color:#fff;margin-bottom:6px;">🎬 Telugu Songs</h1>
+  <p style="color:rgba(255,255,255,0.85);font-size:0.95rem;">Browse and download Telugu movie songs (2016–2026)</p>
+</div>
+
+<!-- FILTER BAR -->
+<div class="filter-bar">
+  <div class="filter-bar-inner">
+    <span class="filter-label">📅 Year:</span>
+    <div class="filter-chips">
+      <button class="filter-chip" data-year="all">All</button>
+      <button class="filter-chip" data-year="2026">2026</button>
+      <button class="filter-chip" data-year="2025">2025</button>
+      <button class="filter-chip" data-year="2024">2024</button>
+      <button class="filter-chip" data-year="2023">2023</button>
+      <button class="filter-chip" data-year="2022">2022</button>
+      <button class="filter-chip" data-year="2021">2021</button>
+      <button class="filter-chip" data-year="2020">2020</button>
+      <button class="filter-chip" data-year="2019">2019</button>
+      <button class="filter-chip" data-year="2018">2018</button>
+      <button class="filter-chip" data-year="2017">2017</button>
+      <button class="filter-chip" data-year="2016">2016</button>
+    </div>
+    <input type="text" class="inline-search" id="inlineSearch" placeholder="Search movies…">
+  </div>
+</div>
+
+<!-- RESULTS INFO -->
+<div id="resultInfo" style="display:none;background:var(--primary-bg);padding:10px 24px;border-bottom:1px solid var(--gray-200);">
+  <p style="max-width:1280px;margin:auto;font-size:0.85rem;color:var(--primary-dark);" id="resultText"></p>
+</div>
+
+<!-- MOVIES + SONGS LIST -->
+<section class="section">
+  <div class="section-inner">
+    <div class="section-header">
+      <div>
+        <p class="section-eyebrow" id="eyebrow">Telugu Movies</p>
+        <h2 class="section-title" id="sectionTitle">All Songs (2016–2026)</h2>
+      </div>
+      <span id="countBadge" style="font-size:0.82rem;color:var(--text-muted);"></span>
+    </div>
+
+    <div class="movies-list" id="moviesList">
+      <div class="loader"><div class="spinner"></div><p>Loading songs…</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div>
+    <span class="logo-text">Music Mama</span>
+    <p>Telugu Songs — 2016 to 2026 &nbsp;|&nbsp; © 2026 Music Mama</p>
+  </div>
+</footer>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script type="module">
+  import { getMovies, searchMovies, getSongs } from '../js/firebase.js';
+
+  // Read URL params
+  const params = new URLSearchParams(window.location.search);
+  let activeYear   = params.get('year') || 'all';
+  let activeSearch = params.get('q')    || '';
+
+  // Set active filter chip
+  function setActiveChip(year) {
+    document.querySelectorAll('.filter-chip').forEach(c => {
+      c.classList.toggle('active', c.dataset.year === year);
+    });
+  }
+  setActiveChip(activeYear);
+  if (activeSearch) document.getElementById('inlineSearch').value = activeSearch;
+
+  // ── LOAD ──────────────────────────────────────────────
+  async function load() {
+    const list = document.getElementById('moviesList');
+    list.innerHTML = `<div class="loader"><div class="spinner"></div><p>Loading songs…</p></div>`;
+
+    try {
+      let movies;
+      if (activeSearch) {
+        movies = await searchMovies(activeSearch, 'telugu');
+      } else {
+        const year = activeYear === 'all' ? undefined : Number(activeYear);
+        movies = await getMovies({ language: 'telugu', year });
+      }
+
+      updateHeader(movies.length);
+
+      if (!movies.length) {
+        list.innerHTML = `<div class="no-results">
+          <span class="icon">🎵</span>
+          <h3>${activeSearch ? `No results for "${activeSearch}"` : 'No songs uploaded yet'}</h3>
+          <p>${activeSearch ? 'Try a different search term.' : 'Add movies and songs from the Admin panel.'}</p>
+        </div>`;
+        return;
+      }
+
+      // Render all movie blocks (songs loaded on expand)
+      list.innerHTML = movies.map(m => movieBlockHTML(m)).join('');
+
+      // Scroll animation
+      const obs = new IntersectionObserver(entries => {
+        entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+      }, { threshold: 0.05 });
+      document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+
+      // Auto-expand first movie
+      if (movies.length > 0) expandBlock(movies[0].id);
+
+    } catch(e) {
+      console.error(e);
+      list.innerHTML = `<div class="no-results">
+        <span class="icon">⚠️</span>
+        <h3>Firebase not connected</h3>
+        <p>Please add your Firebase credentials to js/firebase.js</p>
+      </div>`;
+    }
+  }
+
+  function updateHeader(count) {
+    const info   = document.getElementById('resultInfo');
+    const text   = document.getElementById('resultText');
+    const eyebrow = document.getElementById('eyebrow');
+    const title  = document.getElementById('sectionTitle');
+    const badge  = document.getElementById('countBadge');
+
+    if (activeSearch) {
+      eyebrow.textContent = 'Search Results';
+      title.textContent   = `Results for "${activeSearch}"`;
+      info.style.display  = 'block';
+      text.textContent    = `Found ${count} movie${count !== 1 ? 's' : ''} matching "${activeSearch}"`;
+    } else if (activeYear !== 'all') {
+      eyebrow.textContent = `${activeYear} Releases`;
+      title.textContent   = `Telugu Songs — ${activeYear}`;
+      info.style.display  = 'none';
+    } else {
+      eyebrow.textContent = 'Telugu Movies';
+      title.textContent   = 'All Songs (2016–2026)';
+      info.style.display  = 'none';
+    }
+    badge.textContent = count ? `${count} movie${count !== 1 ? 's' : ''}` : '';
+  }
+
+  // ── MOVIE BLOCK HTML ──────────────────────────────────
+  function movieBlockHTML(m) {
+    return `
+      <div class="movie-block fade-in" id="mb-${m.id}">
+        <div class="movie-header" onclick="window.toggleBlock('${m.id}')">
+          <div class="movie-header-left">
+            <div class="movie-icon">🎬</div>
+            <div>
+              <span class="movie-name">${m.name}</span>
+              <span class="movie-year-tag">${m.year}</span>
+            </div>
+          </div>
+          <div class="movie-header-right">
+            <span class="songs-badge" id="badge-${m.id}">🎶 Loading…</span>
+            <button class="toggle-btn">▾</button>
+          </div>
+        </div>
+        <div class="songs-list" id="songs-${m.id}">
+          <div class="loader" style="padding:24px;"><div class="spinner"></div><p>Loading songs…</p></div>
+        </div>
+      </div>`;
+  }
+
+  // ── EXPAND / LOAD SONGS ───────────────────────────────
+  const loadedMovies = new Set();
+
+  async function expandBlock(movieId) {
+    const block = document.getElementById(`mb-${movieId}`);
+    if (!block) return;
+    block.classList.add('open');
+    if (loadedMovies.has(movieId)) return;
+    loadedMovies.add(movieId);
+
+    try {
+      const songs  = await getSongs(movieId);
+      const badge  = document.getElementById(`badge-${movieId}`);
+      const songEl = document.getElementById(`songs-${movieId}`);
+
+      badge.textContent = songs.length ? `🎶 ${songs.length} Songs` : '🎵 No songs yet';
+
+      if (!songs.length) {
+        songEl.innerHTML = `<div style="padding:16px 18px;color:var(--text-muted);font-size:0.85rem;">🎵 No songs uploaded yet for this movie.</div>`;
+        return;
+      }
+
+      songEl.innerHTML = songs.map((s, i) => `
+        <div class="song-row">
+          <span class="song-num">${i + 1}</span>
+          <span class="song-icon">🎵</span>
+          <span class="song-name">${s.name}</span>
+          ${s.size ? `<span class="song-size">${s.size}</span>` : ''}
+          ${s.downloadUrl
+            ? `<a href="${s.downloadUrl}" download="${s.name}" class="btn-download">⬇️ Download</a>`
+            : `<button class="btn-download unavailable" disabled>⏳ Soon</button>`}
+        </div>`).join('');
+    } catch(e) {
+      document.getElementById(`songs-${movieId}`).innerHTML =
+        `<div style="padding:16px;color:red;font-size:0.82rem;">Error loading songs.</div>`;
+    }
+  }
+
+  // Toggle open/close — load songs on first open
+  window.toggleBlock = async (id) => {
+    const block = document.getElementById(`mb-${id}`);
+    if (!block) return;
+    const isOpen = block.classList.contains('open');
+    if (isOpen) {
+      block.classList.remove('open');
+    } else {
+      await expandBlock(id);
+    }
+  };
+
+  // ── FILTER CHIPS ──────────────────────────────────────
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      activeYear   = chip.dataset.year;
+      activeSearch = '';
+      document.getElementById('inlineSearch').value = '';
+      setActiveChip(activeYear);
+      load();
+    });
+  });
+
+  // ── INLINE SEARCH ─────────────────────────────────────
+  let searchTimer;
+  document.getElementById('inlineSearch').addEventListener('input', e => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      activeSearch = e.target.value.trim();
+      activeYear   = 'all';
+      setActiveChip('all');
+      load();
+    }, 350);
+  });
+
+  // Hamburger
+  document.getElementById('hamburger').addEventListener('click', () => {
+    document.getElementById('mobileMenu').classList.toggle('open');
+  });
+
+  load();
+</script>
+
+</body>
+</html>

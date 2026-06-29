@@ -1,0 +1,33 @@
+// ── firestore.rules ──────────────────────────────────
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /movies/{movieId} {
+      allow read: if true;
+      allow write: if true; // No login — admin is open
+    }
+    match /movies/{movieId}/songs/{songId} {
+      allow read: if true;
+      allow write: if true;
+    }
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
+// ── storage.rules ─────────────────────────────────────
+// Paste this in Firebase Console → Storage → Rules
+
+// rules_version = '2';
+// service firebase.storage {
+//   match /b/{bucket}/o {
+//     match /songs/{movieId}/{fileName} {
+//       allow read: if true;
+//       allow write: if true;
+//     }
+//     match /{allPaths=**} {
+//       allow read, write: if false;
+//     }
+//   }
+// }

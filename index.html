@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="te">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Music Mama — Telugu Songs Download</title>
+  <meta name="description" content="Download Telugu, Tamil, Hindi movie songs free. Music Mama.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="index.html" class="logo">
+      <div class="logo-icon">🎵</div>
+      <div>
+        <span class="logo-text">Music Mama</span>
+        <span class="logo-sub">Songs Download</span>
+      </div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html" class="active">Home</a></li>
+      <li><a href="pages/telugu.html">Telugu</a></li>
+      <li><a href="#languages">Languages</a></li>
+    </ul>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <a href="admin/index.html" style="color:var(--text-muted);font-size:0.82rem;text-decoration:none;">⚙️ Admin</a>
+      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html">🏠 Home</a>
+    <a href="pages/telugu.html">🎬 Telugu</a>
+    <a href="#languages">🌐 Languages</a>
+    <a href="admin/index.html">⚙️ Admin</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">🎶 South Indian Music Hub</div>
+    <h1>Music Mama</h1>
+    <p>Download your favourite South Indian movie songs — free & fast.</p>
+    <div class="search-wrap">
+      <input type="text" id="searchInput" placeholder="Search movies or songs…" autocomplete="off">
+      <button class="search-btn" id="searchBtn">🔍 Search</button>
+    </div>
+    <div class="year-filter">
+      <button class="year-chip" data-year="all">All</button>
+      <button class="year-chip" data-year="2026">2026</button>
+      <button class="year-chip" data-year="2025">2025</button>
+      <button class="year-chip" data-year="2024">2024</button>
+      <button class="year-chip" data-year="2023">2023</button>
+      <button class="year-chip" data-year="2022">2022</button>
+      <button class="year-chip" data-year="2021">2021</button>
+      <button class="year-chip" data-year="2020">2020</button>
+      <button class="year-chip" data-year="2019">2019</button>
+      <button class="year-chip" data-year="2018">2018</button>
+      <button class="year-chip" data-year="2017">2017</button>
+      <button class="year-chip" data-year="2016">2016</button>
+    </div>
+  </div>
+</section>
+
+<!-- LANGUAGES -->
+<section class="section" id="languages">
+  <div class="section-inner">
+    <div class="section-header">
+      <div>
+        <p class="section-eyebrow">Browse by Language</p>
+        <h2 class="section-title">Choose Your Language</h2>
+      </div>
+    </div>
+    <div class="lang-grid">
+      <a href="pages/telugu.html" class="lang-card active">
+        <span class="lang-emoji">🎬</span>
+        <div class="lang-name">Telugu</div>
+        <div class="lang-status">✅ Available</div>
+      </a>
+      <div class="lang-card" onclick="showCS('Tamil')">
+        <span class="lang-emoji">🎭</span>
+        <div class="lang-name">Tamil</div>
+        <div class="lang-status">Coming Soon</div>
+      </div>
+      <div class="lang-card" onclick="showCS('Hindi')">
+        <span class="lang-emoji">🎪</span>
+        <div class="lang-name">Hindi</div>
+        <div class="lang-status">Coming Soon</div>
+      </div>
+      <div class="lang-card" onclick="showCS('Kannada')">
+        <span class="lang-emoji">🎸</span>
+        <div class="lang-name">Kannada</div>
+        <div class="lang-status">Coming Soon</div>
+      </div>
+      <div class="lang-card" onclick="showCS('Malayalam')">
+        <span class="lang-emoji">🎺</span>
+        <div class="lang-name">Malayalam</div>
+        <div class="lang-status">Coming Soon</div>
+      </div>
+      <div class="lang-card" onclick="showCS('English')">
+        <span class="lang-emoji">🎤</span>
+        <div class="lang-name">English</div>
+        <div class="lang-status">Coming Soon</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LATEST SONGS PREVIEW -->
+<section class="section" style="background:var(--gray-50);">
+  <div class="section-inner">
+    <div class="section-header fade-in">
+      <div>
+        <p class="section-eyebrow">Telugu Songs</p>
+        <h2 class="section-title">Latest Uploads</h2>
+      </div>
+      <a href="pages/telugu.html" style="color:var(--primary);font-weight:600;text-decoration:none;font-size:0.88rem;">View All →</a>
+    </div>
+    <div id="latestList">
+      <div class="loader"><div class="spinner"></div><p>Loading…</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div>
+    <span class="logo-text">Music Mama</span>
+    <p>Your #1 destination for South Indian movie songs. © 2026 Music Mama.</p>
+  </div>
+</footer>
+
+<!-- COMING SOON OVERLAY -->
+<div class="coming-soon-overlay" id="csOverlay" onclick="closeCS(event)">
+  <div class="coming-soon-box">
+    <span class="emoji">🚀</span>
+    <h2>Coming Soon!</h2>
+    <p><strong id="csLang"></strong> songs are coming very soon. Stay tuned!</p>
+    <button class="btn-close" onclick="closeCS()">Got it!</button>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script type="module">
+  import { getMovies, getSongs } from './js/firebase.js';
+
+  // Load latest 5 movies with their songs
+  async function loadLatest() {
+    const el = document.getElementById('latestList');
+    try {
+      const movies = await getMovies({ language: 'telugu' });
+      const latest = movies.slice(0, 5);
+      if (!latest.length) {
+        el.innerHTML = `<div class="no-results"><span class="icon">🎵</span><h3>No songs uploaded yet</h3><p>Add songs from the Admin panel.</p></div>`;
+        return;
+      }
+      // Load songs for each
+      const blocks = await Promise.all(latest.map(m => buildBlock(m)));
+      el.innerHTML = blocks.join('');
+      attachToggle();
+    } catch(e) {
+      el.innerHTML = `<div class="no-results"><span class="icon">⚠️</span><h3>Firebase not configured</h3><p>Update js/firebase.js with your credentials.</p></div>`;
+    }
+  }
+
+  async function buildBlock(m) {
+    let songs = [];
+    try { songs = await getSongs(m.id); } catch(e) {}
+    return movieBlock(m, songs);
+  }
+
+  function movieBlock(m, songs) {
+    const songRows = songs.length
+      ? songs.map((s, i) => `
+        <div class="song-row">
+          <span class="song-num">${i+1}</span>
+          <span class="song-icon">🎵</span>
+          <span class="song-name">${s.name}</span>
+          ${s.size ? `<span class="song-size">${s.size}</span>` : ''}
+          ${s.downloadUrl
+            ? `<a href="${s.downloadUrl}" download class="btn-download">⬇️ Download</a>`
+            : `<button class="btn-download unavailable" disabled>⏳ Soon</button>`}
+        </div>`).join('')
+      : `<div style="padding:16px 14px;color:var(--text-muted);font-size:0.85rem;">🎵 Songs coming soon…</div>`;
+
+    return `
+      <div class="movie-block fade-in" id="mb-${m.id}">
+        <div class="movie-header" onclick="toggleBlock('${m.id}')">
+          <div class="movie-header-left">
+            <div class="movie-icon">🎬</div>
+            <div>
+              <span class="movie-name">${m.name}</span>
+              <span class="movie-year-tag">${m.year}</span>
+            </div>
+          </div>
+          <div class="movie-header-right">
+            ${songs.length ? `<span class="songs-badge">🎶 ${songs.length} Songs</span>` : ''}
+            <button class="toggle-btn">▾</button>
+          </div>
+        </div>
+        <div class="songs-list">${songRows}</div>
+      </div>`;
+  }
+
+  window.toggleBlock = (id) => {
+    document.getElementById(`mb-${id}`).classList.toggle('open');
+  };
+  function attachToggle() {
+    // handled via onclick in html
+  }
+
+  // Scroll animations
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.08 });
+  setTimeout(() => document.querySelectorAll('.fade-in').forEach(el => obs.observe(el)), 200);
+
+  loadLatest();
+
+  // Search
+  const go = () => {
+    const q = document.getElementById('searchInput').value.trim();
+    if (q) window.location.href = `pages/telugu.html?q=${encodeURIComponent(q)}`;
+  };
+  document.getElementById('searchBtn').addEventListener('click', go);
+  document.getElementById('searchInput').addEventListener('keydown', e => { if(e.key==='Enter') go(); });
+
+  // Year chips
+  document.querySelectorAll('.year-chip').forEach(c => {
+    c.addEventListener('click', () => {
+      const y = c.dataset.year;
+      window.location.href = y === 'all' ? 'pages/telugu.html' : `pages/telugu.html?year=${y}`;
+    });
+  });
+
+  // Hamburger
+  document.getElementById('hamburger').addEventListener('click', () => {
+    document.getElementById('mobileMenu').classList.toggle('open');
+  });
+</script>
+
+<script>
+  function showCS(lang) {
+    document.getElementById('csLang').textContent = lang;
+    document.getElementById('csOverlay').classList.add('show');
+  }
+  function closeCS(e) {
+    if (!e || e.target === document.getElementById('csOverlay')) {
+      document.getElementById('csOverlay').classList.remove('show');
+    }
+  }
+</script>
+</body>
+</html>
